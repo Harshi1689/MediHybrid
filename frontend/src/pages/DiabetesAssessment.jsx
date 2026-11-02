@@ -62,9 +62,19 @@ export default function DiabetesAssessment({ onAssessmentCompleted }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    // Allow clearing the field completely without snapping back to 0
+    if (value === '') {
+      setFormData((prev) => ({ ...prev, [name]: '' }));
+      return;
+    }
+    // Remove accidental leading zeros (e.g., "0750" -> "750", "08" -> "8") while keeping decimals like "0.5"
+    let cleanVal = value;
+    if (/^0[0-9]+/.test(cleanVal)) {
+      cleanVal = cleanVal.replace(/^0+/, '');
+    }
     setFormData((prev) => ({
       ...prev,
-      [name]: parseFloat(value) || 0
+      [name]: cleanVal
     }));
   };
 
@@ -83,8 +93,14 @@ export default function DiabetesAssessment({ onAssessmentCompleted }) {
     setLoading(true);
     setError(null);
 
+    // Convert values to float for API request
+    const cleanPayload = {};
+    Object.keys(formData).forEach((k) => {
+      cleanPayload[k] = formData[k] === '' ? 0 : parseFloat(formData[k]) || 0;
+    });
+
     try {
-      const res = await predictDiabetes(formData);
+      const res = await predictDiabetes(cleanPayload);
       onAssessmentCompleted(res.data);
       // Navigate to results page with prediction payload
       navigate('/results', { state: { result: res.data } });
@@ -168,8 +184,9 @@ export default function DiabetesAssessment({ onAssessmentCompleted }) {
               min="40"
               max="300"
               step="1"
-              value={formData.Glucose}
+              value={formData.Glucose ?? ''}
               onChange={handleChange}
+              onFocus={(e) => e.target.select()}
               required
               className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 outline-none"
             />
@@ -188,8 +205,9 @@ export default function DiabetesAssessment({ onAssessmentCompleted }) {
               min="12.0"
               max="70.0"
               step="0.1"
-              value={formData.BMI}
+              value={formData.BMI ?? ''}
               onChange={handleChange}
+              onFocus={(e) => e.target.select()}
               required
               className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 outline-none"
             />
@@ -208,8 +226,9 @@ export default function DiabetesAssessment({ onAssessmentCompleted }) {
               min="40"
               max="200"
               step="1"
-              value={formData.BloodPressure}
+              value={formData.BloodPressure ?? ''}
               onChange={handleChange}
+              onFocus={(e) => e.target.select()}
               required
               className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 outline-none"
             />
@@ -228,8 +247,9 @@ export default function DiabetesAssessment({ onAssessmentCompleted }) {
               min="18"
               max="110"
               step="1"
-              value={formData.Age}
+              value={formData.Age ?? ''}
               onChange={handleChange}
+              onFocus={(e) => e.target.select()}
               required
               className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 outline-none"
             />
@@ -248,8 +268,9 @@ export default function DiabetesAssessment({ onAssessmentCompleted }) {
               min="0"
               max="20"
               step="1"
-              value={formData.Pregnancies}
+              value={formData.Pregnancies ?? ''}
               onChange={handleChange}
+              onFocus={(e) => e.target.select()}
               required
               className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 outline-none"
             />
@@ -268,8 +289,9 @@ export default function DiabetesAssessment({ onAssessmentCompleted }) {
               min="10"
               max="900"
               step="1"
-              value={formData.Insulin}
+              value={formData.Insulin ?? ''}
               onChange={handleChange}
+              onFocus={(e) => e.target.select()}
               required
               className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 outline-none"
             />
@@ -288,8 +310,9 @@ export default function DiabetesAssessment({ onAssessmentCompleted }) {
               min="5"
               max="99"
               step="1"
-              value={formData.SkinThickness}
+              value={formData.SkinThickness ?? ''}
               onChange={handleChange}
+              onFocus={(e) => e.target.select()}
               required
               className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 outline-none"
             />
@@ -308,8 +331,9 @@ export default function DiabetesAssessment({ onAssessmentCompleted }) {
               min="0.05"
               max="2.8"
               step="0.01"
-              value={formData.DiabetesPedigreeFunction}
+              value={formData.DiabetesPedigreeFunction ?? ''}
               onChange={handleChange}
+              onFocus={(e) => e.target.select()}
               required
               className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 outline-none"
             />

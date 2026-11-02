@@ -65,9 +65,19 @@ export default function HeartAssessment({ onAssessmentCompleted }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    // Allow clearing the field completely without snapping back to 0
+    if (value === '') {
+      setFormData((prev) => ({ ...prev, [name]: '' }));
+      return;
+    }
+    // Remove accidental leading zeros (e.g., "0750" -> "750", "08" -> "8") while keeping decimals like "0.5"
+    let cleanVal = value;
+    if (/^0[0-9]+/.test(cleanVal)) {
+      cleanVal = cleanVal.replace(/^0+/, '');
+    }
     setFormData((prev) => ({
       ...prev,
-      [name]: parseFloat(value) || 0
+      [name]: cleanVal
     }));
   };
 
@@ -86,8 +96,14 @@ export default function HeartAssessment({ onAssessmentCompleted }) {
     setLoading(true);
     setError(null);
 
+    // Convert values to float for API request
+    const cleanPayload = {};
+    Object.keys(formData).forEach((k) => {
+      cleanPayload[k] = formData[k] === '' ? 0 : parseFloat(formData[k]) || 0;
+    });
+
     try {
-      const res = await predictHeart(formData);
+      const res = await predictHeart(cleanPayload);
       onAssessmentCompleted(res.data);
       navigate('/results', { state: { result: res.data } });
     } catch (err) {
@@ -169,8 +185,9 @@ export default function HeartAssessment({ onAssessmentCompleted }) {
               name="age"
               min="20"
               max="95"
-              value={formData.age}
+              value={formData.age ?? ''}
               onChange={handleChange}
+              onFocus={(e) => e.target.select()}
               required
               className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500 outline-none"
             />
@@ -217,8 +234,9 @@ export default function HeartAssessment({ onAssessmentCompleted }) {
               name="trestbps"
               min="80"
               max="220"
-              value={formData.trestbps}
+              value={formData.trestbps ?? ''}
               onChange={handleChange}
+              onFocus={(e) => e.target.select()}
               required
               className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500 outline-none"
             />
@@ -235,8 +253,9 @@ export default function HeartAssessment({ onAssessmentCompleted }) {
               name="chol"
               min="100"
               max="550"
-              value={formData.chol}
+              value={formData.chol ?? ''}
               onChange={handleChange}
+              onFocus={(e) => e.target.select()}
               required
               className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500 outline-none"
             />
@@ -253,8 +272,9 @@ export default function HeartAssessment({ onAssessmentCompleted }) {
               name="thalach"
               min="60"
               max="220"
-              value={formData.thalach}
+              value={formData.thalach ?? ''}
               onChange={handleChange}
+              onFocus={(e) => e.target.select()}
               required
               className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500 outline-none"
             />
@@ -286,8 +306,9 @@ export default function HeartAssessment({ onAssessmentCompleted }) {
               min="0.0"
               max="6.5"
               step="0.1"
-              value={formData.oldpeak}
+              value={formData.oldpeak ?? ''}
               onChange={handleChange}
+              onFocus={(e) => e.target.select()}
               required
               className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500 outline-none"
             />
