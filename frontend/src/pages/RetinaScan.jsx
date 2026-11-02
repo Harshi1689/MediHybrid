@@ -63,7 +63,14 @@ export default function RetinaScan({ onRetinaCompleted }) {
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch(`/sample_retina/${sample.file}`);
+      const apiBase = import.meta.env.VITE_API_BASE_URL ? import.meta.env.VITE_API_BASE_URL.replace(/\/+$/, '') : '';
+      let res;
+      try {
+        res = await fetch(`/sample_retina/${sample.file}`);
+        if (!res.ok) throw new Error('Local sample not found');
+      } catch {
+        res = await fetch(`${apiBase}/sample_retina/${sample.file}`);
+      }
       const blob = await res.blob();
       const sampleFile = new File([blob], sample.file, { type: 'image/jpeg' });
       selectFile(sampleFile);

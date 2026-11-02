@@ -1,8 +1,11 @@
 import axios from 'axios';
 
+const rawBaseURL = import.meta.env.VITE_API_BASE_URL || '';
+const cleanBaseURL = rawBaseURL.endsWith('/') ? rawBaseURL.slice(0, -1) : rawBaseURL;
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '',
-  timeout: 20000,
+  baseURL: cleanBaseURL,
+  timeout: 30000,
 });
 
 export const healthCheck = () => api.get('/api/health');
