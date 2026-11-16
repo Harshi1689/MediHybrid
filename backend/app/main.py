@@ -62,9 +62,7 @@ if os.path.exists(SAMPLE_RETINA_DIR):
 # Mount compiled production React frontend if present
 FRONTEND_DIST = os.path.join(os.path.dirname(__file__), "..", "..", "frontend", "dist")
 if os.path.exists(FRONTEND_DIST):
-    assets_dir = os.path.join(FRONTEND_DIST, "assets")
-    if os.path.exists(assets_dir):
-        app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+    app.mount("/assets", StaticFiles(directory=os.path.join(FRONTEND_DIST, "assets")), name="assets")
 
     @app.get("/{full_path:path}")
     async def serve_spa(full_path: str):
@@ -72,9 +70,7 @@ if os.path.exists(FRONTEND_DIST):
         if full_path.startswith("api") or full_path.startswith("docs") or full_path.startswith("openapi.json"):
             return None
         index_file = os.path.join(FRONTEND_DIST, "index.html")
-        if os.path.exists(index_file):
-            return FileResponse(index_file)
-        return {"status": "ok", "message": "MediHybrid API active"}
+        return FileResponse(index_file)
 
 if __name__ == "__main__":
     import uvicorn

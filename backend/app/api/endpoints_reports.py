@@ -5,13 +5,26 @@ Medical Report Scanner (OCR) & PDF Assessment Report Download Endpoints.
 """
 
 from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, Response
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
+import os
 from app.database import get_db
 from app.models.db_models import Assessment
 from app.services.ocr_service import report_scanner
 from app.services.pdf_service import pdf_generator
 
 router = APIRouter(prefix="/api/reports", tags=["Reports & OCR"])
+
+@router.get("/academic-pdf")
+def get_academic_report_pdf():
+    pdf_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "docs", "MediHybrid_Academic_Report.pdf"))
+    if not os.path.exists(pdf_path):
+        raise HTTPException(status_code=404, detail="Academic report PDF not found on server.")
+    return FileResponse(
+        pdf_path,
+        media_type="application/pdf",
+        filename="MediHybrid_Academic_Report_Amith_Harshith.pdf"
+    )
 
 @router.post("/extract")
 async def extract_medical_report(file: UploadFile = File(...)):
